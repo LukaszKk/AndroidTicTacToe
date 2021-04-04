@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TicTacToe</string>
+    <string name="end">Close</string>
+    <string name="new_game">New Game</string>
+    <string name="default_square_value"> . </string>
+    <string name="x_square_value">X</string>
+    <string name="o_square_value">O</string>
+</resources>

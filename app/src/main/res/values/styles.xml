@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="square_style">
+        <item name="android:layout_height">80dp</item>
+        <item name="android:layout_width">80dp</item>
+        <item name="android:text">@string/default_square_value</item>
+        <item name="android:textSize">30sp</item>
+        <item name="android:onClick">changeButtonState</item>
+    </style>
+</resources>
