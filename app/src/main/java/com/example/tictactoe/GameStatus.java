@@ -1,5 +1,8 @@
 package com.example.tictactoe;
 
+import static com.example.tictactoe.ButtonManager.setButtonTextColor;
+import static com.example.tictactoe.Board.winningCombinations;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -13,42 +16,44 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
-import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import static com.example.tictactoe.ButtonManager.setButtonColor;
-import static com.example.tictactoe.ButtonManager.setButtonTextColor;
+import java.util.concurrent.ThreadLocalRandom;
 
 @RequiresApi(api = Build.VERSION_CODES.R)
 public class GameStatus {
 
-    private static final List<List<Integer>> winningCombinations = List.of(List.of(R.id.button4, R.id.button2, R.id.button3),
-            List.of(R.id.button3, R.id.button7, R.id.button6),
-            List.of(R.id.button6, R.id.button8, R.id.button9),
-            List.of(R.id.button9, R.id.button5, R.id.button4),
-            List.of(R.id.button9, R.id.button5, R.id.button4),
-            List.of(R.id.button2, R.id.button1, R.id.button8),
-            List.of(R.id.button4, R.id.button1, R.id.button6),
-            List.of(R.id.button9, R.id.button1, R.id.button3));
-
     private final Activity activity;
     private final ButtonManager buttonManager;
     private final List<Integer> buttons;
-    private boolean playerChange;
+    private List<Integer> taken;
+    private boolean playerStart;
+    private String playerValue;
+    private String computerValue;
 
     private GameStatus(Activity activity) {
         this.activity = activity;
-        this.playerChange = false;
+        this.playerStart = ThreadLocalRandom.current().nextInt(0, 2) == 0;
+        if (ThreadLocalRandom.current().nextInt(0, 2) == 0) {
+            this.playerValue = activity.getString(R.string.o_square_value);
+            this.computerValue = activity.getString(R.string.x_square_value);
+        } else {
+            this.playerValue = activity.getString(R.string.x_square_value);
+            this.computerValue = activity.getString(R.string.o_square_value);
+        }
         this.buttonManager = new ButtonManager(activity);
         this.buttons = new ArrayList<>();
+        this.taken = new ArrayList<>();
 
         for(int i = 1; i < 10; i++) {
             String name = "button" + i;
             int buttonId = activity.getResources().getIdentifier(name, "id", activity.getPackageName());
             buttons.add(buttonId);
         }
+
+        newGame();
     }
 
     public static GameStatus initialize(Activity activity) {
@@ -57,6 +62,11 @@ public class GameStatus {
 
     public void newGame() {
         buttonManager.initButtonsState(buttons);
+        if (!playerStart) {
+            List<Integer> move = aiTurn();
+            Button aiButton = activity.findViewById(Board.board[move.get(0)][move.get(1)]);
+            setButtonTextColor(aiButton, computerValue, Color.BLUE);
+        }
     }
 
     public void changeButtonState(View view) {
@@ -65,12 +75,15 @@ public class GameStatus {
             return;
         }
 
-        if (playerChange) {
-            setButtonTextColor(button, activity.getString(R.string.o_square_value), Color.CYAN);
-        } else {
-            setButtonTextColor(button, activity.getString(R.string.x_square_value), Color.BLUE);
-        }
-        playerChange = !playerChange;
+        Board.boardMap[i][j] = -1;
+        setButtonTextColor(button, playerValue, Color.CYAN);
+
+        List<Integer> move = aiTurn();
+        Button aiButton = activity.findViewById(Board.board[move.get(0)][move.get(1)]);
+        setButtonTextColor(aiButton, computerValue, Color.BLUE);
+
+        taken.add(button.getId());
+        playerStart = !playerStart;
 
         checkEndCondition(view);
     }
@@ -78,12 +91,12 @@ public class GameStatus {
     private void checkEndCondition(View view) {
         boolean end = false;
         String winner = "";
-        if (checkWinConditionFor(activity.getString(R.string.o_square_value))) {
+        if (checkWinConditionFor(playerValue)) {
             end = true;
-            winner = activity.getString(R.string.o_square_value);
-        } else if (checkWinConditionFor(activity.getString(R.string.x_square_value))) {
+            winner = playerValue;
+        } else if (checkWinConditionFor(computerValue)) {
             end = true;
-            winner = activity.getString(R.string.x_square_value);
+            winner = computerValue;
         }
 
         if (!end) {
@@ -102,9 +115,9 @@ public class GameStatus {
 
             boolean val = checkButtonCombination(button1, button2, button3, value);
             if (val) {
-                setButtonColor(button1, Color.GREEN);
-                setButtonColor(button2, Color.GREEN);
-                setButtonColor(button3, Color.GREEN);
+                button1.setTextColor(Color.GREEN);
+                button2.setTextColor(Color.GREEN);
+                button3.setTextColor(Color.GREEN);
                 return true;
             }
         }
@@ -124,10 +137,10 @@ public class GameStatus {
 
         int width = ViewGroup.LayoutParams.WRAP_CONTENT;
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        boolean focusable = true;
-        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-        TextView textView = (TextView) popupView.findViewById(R.id.popup_text);
-        textView.setText("Player " + winner + " won!");
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
+        TextView textView = popupView.findViewById(R.id.popup_text);
+        textView.setPadding(10, 10, 10, 10);
+        textView.setText(String.format(activity.getString(R.string.winner), winner));
 
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
 
@@ -135,5 +148,60 @@ public class GameStatus {
             popupWindow.dismiss();
             return true;
         });
+    }
+
+    private List<Integer> aiTurn() {
+        long bestScore = -Long.MAX_VALUE;
+        List<Integer> move = List.of(0, 0);
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (Board.boardMap[i][j] == 0) {
+                    Board.boardMap[i][j] = 1;
+                    long score = minimax(0, true);
+                    Board.boardMap[i][j] = 0;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = List.of(i, j);
+                    }
+                }
+            }
+        }
+
+        return move;
+    }
+
+    private long minimax(int depth, boolean isMaximazing) {
+        int winValue = checkWinConditionForBoardMap();
+        if (winValue != -2) {
+            return winValue;
+        }
+
+        if (isMaximazing) {
+            long bestScore = -Long.MAX_VALUE;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (Board.boardMap[i][j] == 0) {
+                        Board.boardMap[i][j] = 1;
+                        long score = minimax(depth + 1, false);
+                        Board.boardMap[i][j] = 0;
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+            }
+            return bestScore;
+        } else {
+            long bestScore = Long.MAX_VALUE;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (Board.boardMap[i][j] == 0) {
+                        Board.boardMap[i][j] = -1;
+                        long score = minimax(depth + 1, true);
+                        Board.boardMap[i][j] = 0;
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+            }
+            return bestScore;
+        }
     }
 }

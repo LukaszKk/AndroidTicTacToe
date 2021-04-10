@@ -2,7 +2,6 @@ package com.example.tictactoe;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.view.View;
 import android.widget.Button;
 
 import java.util.List;
@@ -18,12 +17,11 @@ public class ButtonManager {
     public void initButtonsState(List<Integer> buttons) {
         for (int id: buttons) {
             Button button = activity.findViewById(id);
-            setButtonState(button);
-            setButtonColor(button, Color.WHITE);
+            setInitButtonState(button);
         }
     }
 
-    private void setButtonState(Button button) {
+    private void setInitButtonState(Button button) {
         button.setEnabled(true);
         button.setText(activity.getString(R.string.default_square_value));
         button.setTextColor(Color.BLACK);
