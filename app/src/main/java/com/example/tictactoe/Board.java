@@ -1,5 +1,8 @@
 package com.example.tictactoe;
 
+/**
+ * Static board
+ */
 public class Board {
 
     public static Element[][] board;
@@ -25,7 +28,6 @@ public class Board {
                 }
             }
         }
-
         return null;
     }
 }

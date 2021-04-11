@@ -1,6 +1,9 @@
 package com.example.tictactoe;
 
-public class BoardXY {
+/**
+ * Reprents x and y position in Board
+ */
+public final class BoardXY {
 
     private int x;
     private int y;

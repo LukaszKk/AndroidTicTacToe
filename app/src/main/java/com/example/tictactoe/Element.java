@@ -1,5 +1,8 @@
 package com.example.tictactoe;
 
+/**
+ * Holds R.id of button and its actual value in Board
+ */
 public final class Element {
 
     private int id;

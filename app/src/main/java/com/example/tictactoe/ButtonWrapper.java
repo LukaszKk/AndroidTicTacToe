@@ -6,12 +6,30 @@ import android.widget.Button;
 
 import java.util.List;
 
+import static com.example.tictactoe.Board.board;
+
 public class ButtonWrapper {
 
     private final Activity activity;
 
     public ButtonWrapper(Activity activity) {
         this.activity = activity;
+    }
+
+    public void initButtonsState() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                initButtonState(board[i][j].getId());
+            }
+        }
+    }
+
+    public void disableButtons() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                disableButton(board[i][j].getId());
+            }
+        }
     }
 
     public void initButtonState(int id) {
@@ -29,7 +47,7 @@ public class ButtonWrapper {
         activity.findViewById(id).setEnabled(false);
     }
 
-    public static void setButtonTextColor(Button button, String text, int color) {
+    public void setButtonTextColor(Button button, String text, int color) {
         button.setText(text);
         button.setTextColor(color);
     }
