@@ -14,11 +14,9 @@ public class ButtonWrapper {
         this.activity = activity;
     }
 
-    public void initButtonsState(List<Integer> buttons) {
-        for (int id: buttons) {
-            Button button = activity.findViewById(id);
-            setInitButtonState(button);
-        }
+    public void initButtonState(int id) {
+        Button button = activity.findViewById(id);
+        setInitButtonState(button);
     }
 
     private void setInitButtonState(Button button) {
@@ -27,18 +25,12 @@ public class ButtonWrapper {
         button.setTextColor(Color.BLACK);
     }
 
-    public void disableButtons(List<Integer> buttons) {
-        for (int id: buttons) {
-            activity.findViewById(id).setEnabled(false);
-        }
+    public void disableButton(int id) {
+        activity.findViewById(id).setEnabled(false);
     }
 
     public static void setButtonTextColor(Button button, String text, int color) {
         button.setText(text);
         button.setTextColor(color);
-    }
-
-    public static void setButtonColor(Button button, int color) {
-        button.setBackgroundColor(color);
     }
 }

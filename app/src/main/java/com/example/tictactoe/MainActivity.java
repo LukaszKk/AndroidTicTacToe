@@ -13,11 +13,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.game = Game.initialize(this);
+
+        newGame(null);
     }
 
     public void newGame(View view) {
-        game.newGame();
+        game = Game.initialize(this);
     }
 
     public void finish(View view) {

@@ -1,6 +1,7 @@
 package com.example.tictactoe;
 
 import static com.example.tictactoe.Board.board;
+import static com.example.tictactoe.Board.resetBoard;
 import static com.example.tictactoe.ButtonWrapper.setButtonTextColor;
 
 import android.app.Activity;
@@ -17,8 +18,6 @@ import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -27,42 +26,47 @@ public class Game {
 
     private final Activity activity;
     private final ButtonWrapper buttonWrapper;
-    private final List<Integer> buttons;
-    private final boolean playerStart;
     private final String playerValue;
     private final String computerValue;
     private int availableCount;
 
     private Game(Activity activity) {
         this.activity = activity;
-        this.playerStart = ThreadLocalRandom.current().nextInt(0, 2) == 0;
+        boolean playerStart = ThreadLocalRandom.current().nextInt(0, 2) == 0;
         this.playerValue = playerStart ? activity.getString(R.string.x_square_value) : activity.getString(R.string.o_square_value);
         this.computerValue = playerStart ? activity.getString(R.string.o_square_value) : activity.getString(R.string.x_square_value);
         this.buttonWrapper = new ButtonWrapper(activity);
-        this.buttons = new ArrayList<>();
         this.availableCount = 9;
 
-        for(int i = 1; i < 10; i++) {
-            String name = "button" + i;
-            int buttonId = activity.getResources().getIdentifier(name, "id", activity.getPackageName());
-            buttons.add(buttonId);
-        }
-
-        newGame();
-    }
-
-    public static Game initialize(Activity activity) {
-        return new Game(activity);
-    }
-
-    public void newGame() {
-        buttonWrapper.initButtonsState(buttons);
+        resetBoard();
+        initButtonsState();
         if (!playerStart) {
             BoardXY move = Objects.requireNonNull(bestMove());
             board[move.getX()][move.getY()].setValue(Player.AI.getValue());
             Button aiButton = activity.findViewById(board[move.getX()][move.getY()].getId());
             setButtonTextColor(aiButton, computerValue, Color.BLUE);
+            availableCount--;
         }
+    }
+
+    private void initButtonsState() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                buttonWrapper.initButtonState(board[i][j].getId());
+            }
+        }
+    }
+
+    private void disableButtons() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                buttonWrapper.disableButton(board[i][j].getId());
+            }
+        }
+    }
+
+    public static Game initialize(Activity activity) {
+        return new Game(activity);
     }
 
     public void changeButtonState(View view) {
@@ -72,7 +76,7 @@ public class Game {
         }
 
         Element element = Board.findElementOfId(button.getId());
-        Objects.requireNonNull(element).setValue(-1);
+        Objects.requireNonNull(element).setValue(Player.HUMAN.getValue());
         setButtonTextColor(button, playerValue, Color.CYAN);
         availableCount--;
 
@@ -96,68 +100,37 @@ public class Game {
         checkEndCondition(view);
     }
 
-    private boolean checkEndCondition(View view) {
-        int winValue = checkWinConditionForBoardMap();
+    private void printBoard() {
+        System.out.println("AAAAAAAAAAAAA");
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.println(i + "," + j + ": " + board[i][j].getValue());
+            }
+        }
+    }
 
-        if (winValue != Player.NONE.getValue()) {
-            String winner = winValue == Player.HUMAN.getValue() ? playerValue : computerValue;
-            finish(view, String.format(activity.getString(R.string.winner), winner));
-            return true;
+    private boolean checkEndCondition(View view) {
+        Integer winValue = checkWinCondition();
+        if (winValue == null) {
+            return false;
         }
 
-        if (availableCount == 0) {
+        if (winValue == Player.NONE.getValue()) {
             finish(view, activity.getString(R.string.draw));
             return true;
         }
 
-        return false;
+        System.out.println("BBBBBB: " + playerValue);
+        System.out.println(winValue);
+        System.out.println(Player.HUMAN.getValue());
+
+        String winner = winValue == Player.HUMAN.getValue() ? playerValue : computerValue;
+        finish(view, String.format(activity.getString(R.string.winner), winner));
+        return true;
     }
 
-//    private void checkEndCondition(View view) {
-//        boolean end = false;
-//        String winner = "";
-//        if (checkWinConditionFor(playerValue)) {
-//            end = true;
-//            winner = playerValue;
-//        } else if (checkWinConditionFor(computerValue)) {
-//            end = true;
-//            winner = computerValue;
-//        }
-//
-//        if (!end) {
-//            return;
-//        }
-//
-//        buttonWrapper.disableButtons(buttons);
-//        showWinPopUp(view, winner);
-//    }
-
-//    private boolean checkWinConditionFor(String value) {
-//        for (List<Integer> combination: winningCombinations) {
-//            Button button1 = activity.findViewById(combination.get(0));
-//            Button button2 = activity.findViewById(combination.get(1));
-//            Button button3 = activity.findViewById(combination.get(2));
-//
-//            boolean val = checkButtonCombination(button1, button2, button3, value);
-//            if (val) {
-//                button1.setTextColor(Color.GREEN);
-//                button2.setTextColor(Color.GREEN);
-//                button3.setTextColor(Color.GREEN);
-//                return true;
-//            }
-//        }
-//
-//        return false;
-//    }
-
-//    private boolean checkButtonCombination(Button button1, Button button2, Button button3, String value) {
-//        return button1.getText().toString().equals(value)
-//                && button2.getText().toString().equals(value)
-//                && button3.getText().toString().equals(value);
-//    }
-
     private void finish(View view, String text) {
-        buttonWrapper.disableButtons(buttons);
+        disableButtons();
         showWinPopUp(view, text);
     }
 
@@ -187,8 +160,13 @@ public class Game {
             for (int j = 0; j < 3; j++) {
                 if (board[i][j].getValue() == Player.NONE.getValue()) {
                     board[i][j].setValue(Player.AI.getValue());
-                    long score = miniMax(0, true);
+                    availableCount--;
+
+                    long score = miniMax(0, false);
+
                     board[i][j].setValue(Player.NONE.getValue());
+                    availableCount++;
+
                     if (score > bestScore) {
                         bestScore = score;
                         move = BoardXY.of(i, j);
@@ -201,66 +179,84 @@ public class Game {
     }
 
     private long miniMax(int depth, boolean isMaximazing) {
-        int winValue = checkWinConditionForBoardMap();
-        if (winValue != Player.NONE.getValue()) {
+        Integer winValue = checkWinCondition();
+        if (winValue != null) {
             return winValue;
         }
-        if (availableCount == 0) {
-            return Player.NONE.getValue();
-        }
 
+        long bestScore;
         if (isMaximazing) {
-            long bestScore = -Long.MAX_VALUE;
+            bestScore = -Long.MAX_VALUE;
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
                     if (board[i][j].getValue() == Player.NONE.getValue()) {
                         board[i][j].setValue(Player.AI.getValue());
+                        availableCount--;
+
                         long score = miniMax(depth + 1, false);
+
                         board[i][j].setValue(Player.NONE.getValue());
+                        availableCount++;
+
                         bestScore = Math.max(score, bestScore);
                     }
                 }
             }
-            return bestScore;
         } else {
-            long bestScore = Long.MAX_VALUE;
+            bestScore = Long.MAX_VALUE;
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
                     if (board[i][j].getValue() == Player.NONE.getValue()) {
                         board[i][j].setValue(Player.HUMAN.getValue());
+                        availableCount--;
+
                         long score = miniMax(depth + 1, true);
+
                         board[i][j].setValue(Player.NONE.getValue());
+                        availableCount++;
+
                         bestScore = Math.min(score, bestScore);
                     }
                 }
             }
-            return bestScore;
         }
+
+        return bestScore;
     }
 
-    private int checkWinConditionForBoardMap() {
+    private Integer checkWinCondition() {
         for (int i = 0; i < 3; i++) {
             if ((board[i][0].getValue() != Player.NONE.getValue()) &&
-                    equals(board[i][0].getValue(), board[i][2].getValue(), board[i][3].getValue())) {
+                    equalsTriple(board[i][0].getValue(), board[i][1].getValue(), board[i][2].getValue())) {
                 return board[i][0].getValue();
             }
         }
+
         for (int i = 0; i < 3; i++) {
             if ((board[0][i].getValue() != Player.NONE.getValue()) &&
-                    equals(board[0][i].getValue(), board[1][i].getValue(), board[2][i].getValue())) {
+                    equalsTriple(board[0][i].getValue(), board[1][i].getValue(), board[2][i].getValue())) {
                 return board[0][i].getValue();
             }
         }
 
         if ((board[0][0].getValue() != Player.NONE.getValue()) &&
-                equals(board[0][0].getValue(), board[1][1].getValue(), board[2][2].getValue())) {
+                equalsTriple(board[0][0].getValue(), board[1][1].getValue(), board[2][2].getValue())) {
             return board[0][0].getValue();
         }
 
-        return Player.NONE.getValue();
+        if ((board[0][2].getValue() != Player.NONE.getValue()) &&
+                equalsTriple(board[0][2].getValue(), board[1][1].getValue(), board[2][0].getValue())) {
+            return board[0][2].getValue();
+        }
+
+        if (availableCount == 0) {
+            return Player.NONE.getValue();
+        }
+
+        return null;
     }
 
-    private boolean equals(int first, int second, int third) {
+    private boolean equalsTriple(int first, int second, int third) {
         return (first == second) && (first == third);
     }
 }

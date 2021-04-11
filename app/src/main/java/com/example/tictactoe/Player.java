@@ -1,8 +1,8 @@
 package com.example.tictactoe;
 
 public enum Player {
-    HUMAN(-1),
-    AI(1),
+    HUMAN(-10),
+    AI(10),
     NONE(0);
 
     private final int value;
