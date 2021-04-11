@@ -2,24 +2,22 @@ package com.example.tictactoe;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
-    private GameStatus gameStatus;
+    private Game game;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.gameStatus = GameStatus.initialize(this);
+        this.game = Game.initialize(this);
     }
 
     public void newGame(View view) {
-        gameStatus.newGame();
+        game.newGame();
     }
 
     public void finish(View view) {
@@ -27,6 +25,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void changeButtonState(View view) {
-        gameStatus.changeButtonState(view);
+        game.changeButtonState(view);
     }
 }

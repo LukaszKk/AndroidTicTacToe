@@ -6,11 +6,11 @@ import android.widget.Button;
 
 import java.util.List;
 
-public class ButtonManager {
+public class ButtonWrapper {
 
     private final Activity activity;
 
-    public ButtonManager(Activity activity) {
+    public ButtonWrapper(Activity activity) {
         this.activity = activity;
     }
 

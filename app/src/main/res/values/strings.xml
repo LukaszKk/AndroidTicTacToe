@@ -6,4 +6,5 @@
     <string name="x_square_value">X</string>
     <string name="o_square_value">O</string>
     <string name="winner">Player %s won!</string>
+    <string name="draw">Draw!</string>
 </resources>
