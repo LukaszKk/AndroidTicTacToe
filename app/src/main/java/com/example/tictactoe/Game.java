@@ -123,6 +123,7 @@ public class Game {
 
     private void finish(View view, String text) {
         buttonWrapper.disableButtons();
+        setInfoText(text);
         PopUpActivity.showWinPopUp(activity, view, text);
     }
 }
