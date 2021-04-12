@@ -38,13 +38,19 @@ public class ButtonWrapper {
     }
 
     private void setInitButtonState(Button button) {
-        button.setEnabled(true);
+        enableButton(button.getId());
         button.setText(activity.getString(R.string.default_square_value));
         button.setTextColor(Color.BLACK);
     }
 
+    public void enableButton(int id) {
+        activity.findViewById(id).setEnabled(true);
+        activity.findViewById(id).setAlpha(1.0f);
+    }
+
     public void disableButton(int id) {
         activity.findViewById(id).setEnabled(false);
+        activity.findViewById(id).setAlpha(0.7f);
     }
 
     public void setButtonTextColor(Button button, String text, int color) {

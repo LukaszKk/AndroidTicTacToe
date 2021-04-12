@@ -39,11 +39,15 @@ public class Game {
         resetBoard();
         buttonWrapper.initButtonsState();
         if (!isPvP) {
+            buttonWrapper.disableButton(R.id.buttonPvE);
+            buttonWrapper.enableButton(R.id.buttonPvP);
             setInfoText(String.format(activity.getString(R.string.playerInfo), playerValue));
             if (!playerStart) {
                 makeMove();
             }
         } else {
+            buttonWrapper.disableButton(R.id.buttonPvP);
+            buttonWrapper.enableButton(R.id.buttonPvE);
             setInfoText(String.format(activity.getString(R.string.turnInfo), playerValue));
         }
     }
