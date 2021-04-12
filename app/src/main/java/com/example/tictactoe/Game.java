@@ -19,34 +19,41 @@ public class Game {
 
     private final Activity activity;
     private final ButtonWrapper buttonWrapper;
+    private final boolean isPvP;
     private final String playerValue;
     private final String computerValue;
+    private boolean pvpActualPlayer;
     private int availableCount;
 
-    private Game(Activity activity) {
+    private Game(Activity activity, boolean isPvP) {
         this.activity = activity;
         this.buttonWrapper = new ButtonWrapper(activity);
 
-        boolean playerStart = ThreadLocalRandom.current().nextInt(0, 2) == 0;
+        this.isPvP = isPvP;
+        this.pvpActualPlayer = true;
+        boolean playerStart = isPvP || ThreadLocalRandom.current().nextInt(0, 2) == 0;
         this.playerValue = playerStart ? activity.getString(R.string.x_square_value) : activity.getString(R.string.o_square_value);
         this.computerValue = playerStart ? activity.getString(R.string.o_square_value) : activity.getString(R.string.x_square_value);
         this.availableCount = 9;
 
         resetBoard();
         buttonWrapper.initButtonsState();
-        setInfoText();
-        if (!playerStart) {
-            makeMove();
+        if (!isPvP) {
+            setInfoText(String.format(activity.getString(R.string.playerInfo), playerValue));
+            if (!playerStart) {
+                makeMove();
+            }
+        } else {
+            setInfoText(String.format(activity.getString(R.string.turnInfo), playerValue));
         }
     }
 
-    public static Game initialize(Activity activity) {
-        return new Game(activity);
+    public static Game initialize(Activity activity, boolean isPvP) {
+        return new Game(activity, isPvP);
     }
 
-    private void setInfoText() {
+    private void setInfoText(String infoText) {
         TextView infoView = activity.findViewById(R.id.infoView);
-        String infoText = String.format(activity.getString(R.string.playerInfo), playerValue);
         infoView.setText(infoText);
     }
 
@@ -56,18 +63,18 @@ public class Game {
             return;
         }
 
-        makeMove(button);
+        makeMove(button, pvpActualPlayer ? activity.getColor(R.color.red) : activity.getColor(R.color.dark_red));
         if (checkEndCondition(view)) {
             return;
         }
 
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (isPvP) {
+            pvpActualPlayer = !pvpActualPlayer;
+            setInfoText(String.format(activity.getString(R.string.turnInfo), pvpActualPlayer ? playerValue : computerValue));
             return;
         }
 
+        // ai
         makeMove();
         checkEndCondition(view);
     }
@@ -86,10 +93,10 @@ public class Game {
     /**
      * Sets chosen move
      */
-    private void makeMove(Button button) {
+    private void makeMove(Button button, int buttonColor) {
         Element element = Board.findElementOfId(button.getId());
-        Objects.requireNonNull(element).setValue(Player.HUMAN.getValue());
-        buttonWrapper.setButtonTextColor(button, playerValue, activity.getColor(R.color.red));
+        Objects.requireNonNull(element).setValue(pvpActualPlayer ? Player.HUMAN.getValue() : Player.AI.getValue());
+        buttonWrapper.setButtonTextColor(button, pvpActualPlayer ? playerValue : computerValue, buttonColor);
         availableCount--;
     }
 

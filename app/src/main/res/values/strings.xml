@@ -8,4 +8,7 @@
     <string name="winner">Player %s won!</string>
     <string name="draw">Draw!</string>
     <string name="playerInfo">Your symbol: %s</string>
+    <string name="turnInfo">Turn: %s</string>
+    <string name="pvp">PvP</string>
+    <string name="pve">PvE</string>
 </resources>
