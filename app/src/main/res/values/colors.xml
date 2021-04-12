@@ -10,7 +10,10 @@
     <color name="blue">#3030FF</color>
     <color name="dark_blue">#000030</color>
     <color name="green">#00ff00</color>
+    <color name="dark_green">#05b502</color>
     <color name="yellow">#ffff00</color>
     <color name="orange">#ffaa00</color>
     <color name="gray">#888888</color>
+    <color name="red">#ff0000</color>
+    <color name="dark_red">#b30202</color>
 </resources>

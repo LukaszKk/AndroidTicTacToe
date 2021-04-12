@@ -22,7 +22,7 @@ public class PopUpActivity {
         TextView textView = popupView.findViewById(R.id.popup_text);
         textView.setPadding(10, 10, 10, 10);
         textView.setText(text);
-        textView.setTextColor(Color.GREEN);
+        textView.setTextColor(activity.getColor(R.color.dark_green));
 
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
 

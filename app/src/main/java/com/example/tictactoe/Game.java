@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 
@@ -33,6 +34,7 @@ public class Game {
 
         resetBoard();
         buttonWrapper.initButtonsState();
+        setInfoText();
         if (!playerStart) {
             makeMove();
         }
@@ -40,6 +42,12 @@ public class Game {
 
     public static Game initialize(Activity activity) {
         return new Game(activity);
+    }
+
+    private void setInfoText() {
+        TextView infoView = activity.findViewById(R.id.infoView);
+        String infoText = String.format(activity.getString(R.string.playerInfo), playerValue);
+        infoView.setText(infoText);
     }
 
     public void changeButtonState(View view) {
@@ -71,7 +79,7 @@ public class Game {
         BoardXY move = Objects.requireNonNull(MovePicker.bestMove(availableCount));
         board[move.getX()][move.getY()].setValue(Player.AI.getValue());
         Button aiButton = activity.findViewById(board[move.getX()][move.getY()].getId());
-        buttonWrapper.setButtonTextColor(aiButton, computerValue, Color.RED);
+        buttonWrapper.setButtonTextColor(aiButton, computerValue, activity.getColor(R.color.dark_red));
         availableCount--;
     }
 
@@ -81,7 +89,7 @@ public class Game {
     private void makeMove(Button button) {
         Element element = Board.findElementOfId(button.getId());
         Objects.requireNonNull(element).setValue(Player.HUMAN.getValue());
-        buttonWrapper.setButtonTextColor(button, playerValue, Color.RED);
+        buttonWrapper.setButtonTextColor(button, playerValue, activity.getColor(R.color.red));
         availableCount--;
     }
 

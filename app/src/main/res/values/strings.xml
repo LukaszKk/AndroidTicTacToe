@@ -7,4 +7,5 @@
     <string name="o_square_value">O</string>
     <string name="winner">Player %s won!</string>
     <string name="draw">Draw!</string>
+    <string name="playerInfo">Your symbol: %s</string>
 </resources>
