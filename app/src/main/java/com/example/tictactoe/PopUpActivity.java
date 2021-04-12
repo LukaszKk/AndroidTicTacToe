@@ -2,6 +2,7 @@ package com.example.tictactoe;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,7 @@ public class PopUpActivity {
         TextView textView = popupView.findViewById(R.id.popup_text);
         textView.setPadding(10, 10, 10, 10);
         textView.setText(text);
+        textView.setTextColor(Color.GREEN);
 
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
 

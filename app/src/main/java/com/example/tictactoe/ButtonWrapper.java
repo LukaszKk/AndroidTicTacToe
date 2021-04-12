@@ -51,4 +51,11 @@ public class ButtonWrapper {
         button.setText(text);
         button.setTextColor(color);
     }
+
+    public void setButtonsColor(List<Integer> buttons) {
+        for (int id : buttons) {
+            Button button = activity.findViewById(id);
+            button.setTextColor(Color.GREEN);
+        }
+    }
 }

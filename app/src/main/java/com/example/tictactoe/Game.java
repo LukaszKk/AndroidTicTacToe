@@ -14,7 +14,6 @@ import androidx.annotation.RequiresApi;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
-@RequiresApi(api = Build.VERSION_CODES.R)
 public class Game {
 
     private final Activity activity;
@@ -72,7 +71,7 @@ public class Game {
         BoardXY move = Objects.requireNonNull(MovePicker.bestMove(availableCount));
         board[move.getX()][move.getY()].setValue(Player.AI.getValue());
         Button aiButton = activity.findViewById(board[move.getX()][move.getY()].getId());
-        buttonWrapper.setButtonTextColor(aiButton, computerValue, Color.BLUE);
+        buttonWrapper.setButtonTextColor(aiButton, computerValue, Color.RED);
         availableCount--;
     }
 
@@ -82,7 +81,7 @@ public class Game {
     private void makeMove(Button button) {
         Element element = Board.findElementOfId(button.getId());
         Objects.requireNonNull(element).setValue(Player.HUMAN.getValue());
-        buttonWrapper.setButtonTextColor(button, playerValue, Color.CYAN);
+        buttonWrapper.setButtonTextColor(button, playerValue, Color.RED);
         availableCount--;
     }
 
@@ -98,6 +97,7 @@ public class Game {
         }
 
         String winner = winValue == Player.HUMAN.getValue() ? playerValue : computerValue;
+        buttonWrapper.setButtonsColor(GameStatus.winnerCombination);
         finish(view, String.format(activity.getString(R.string.winner), winner));
         return true;
     }
